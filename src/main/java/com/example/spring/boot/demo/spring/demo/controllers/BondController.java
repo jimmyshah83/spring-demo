@@ -36,7 +36,7 @@ public class BondController {
 	this.bondRepository = bondRepository;
     }
 
-//    curl -v localhost:8080/bonds
+//    curl -v localhost:8080/bonds -u jimmy:pass
     @GetMapping("/bonds")
     public Resources<Resource<Bond>> getAll() {
 	List<Resource<Bond>> bonds = bondRepository.findAll().stream().map(bondAssembler::toResource)
@@ -44,27 +44,28 @@ public class BondController {
 	return new Resources<Resource<Bond>>(bonds, linkTo(methodOn(BondController.class).getAll()).withSelfRel());
     }
 
-//    curl -X POST localhost:8080/bonds -H 'Content-type:application/json' -d '{"bondName": "LVMH 19/23", "isin": "FR0013405347", "depth" : "560", "price" : "64.16"}'
+//    curl -X POST localhost:8080/bonds -H 'Content-type:application/json' -d '{"bondName": "LVMH 19/23", "isin": "FR0013405347", "depth" : "560", "price" : "64.16"}' -u admin:pass
     @PostMapping("/bonds")
     public ResponseEntity<?> newBond(@RequestBody Bond newBond) throws URISyntaxException {
 	Resource<Bond> bond = bondAssembler.toResource(bondRepository.save(newBond));
 	return ResponseEntity.created(new URI(bond.getId().expand().getHref())).body(bond);
     }
 
-//    curl -v localhost:8080/bonds/1
+//    curl -v localhost:8080/bonds/1 -u jimmy:pass
     @GetMapping("/bonds/{id}")
     public Resource<Bond> getBondById(@PathVariable Long id) {
 	return bondAssembler.toResource(
 		bondRepository.findById(id).orElseThrow(() -> new BondException("ID = " + id + " not found.")));
     }
 
-//    curl -X DELETE localhost:8080/bonds/4
+//    curl -X DELETE localhost:8080/bonds/4 -u admin:pass
     @DeleteMapping("/bonds/{id}")
     public ResponseEntity<?> deleteBond(@PathVariable Long id) {
 	bondRepository.deleteById(id);
 	return ResponseEntity.noContent().build();
     }
 
+//    CURL command similar to POST
     @PutMapping("/bonds/{id}")
     public ResponseEntity<?> replaceEmployee(@RequestBody Bond newBond, @PathVariable Long id) throws URISyntaxException {
 	Bond updatedBond = bondRepository.findById(id).map(bond -> {
