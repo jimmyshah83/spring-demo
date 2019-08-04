@@ -64,4 +64,12 @@ public class BondControllerTest {
 	JSONAssert.assertEquals("{id:1}", response.getBody(), false);
 	JSONAssert.assertEquals("{isin:FR0013405347}", response.getBody(), false);
     }
+    
+    @Test
+    public void testUnAuthorized() {
+	when(bondRepository.findById(1L)).thenReturn(Optional.of(getNewBond()));
+	
+	ResponseEntity<String> response = restTemplate.getForEntity(BASE_PATH+"/1", String.class);
+	assertThat(response.getStatusCode(), equalTo(HttpStatus.UNAUTHORIZED));
+    }
 }
