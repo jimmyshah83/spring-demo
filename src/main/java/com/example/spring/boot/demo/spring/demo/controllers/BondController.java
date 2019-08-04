@@ -38,10 +38,11 @@ public class BondController {
 
 //    curl -v localhost:8080/bonds -u jimmy:pass
     @GetMapping("/bonds")
-    public Resources<Resource<Bond>> getAll() {
+    public ResponseEntity<Resources<Resource<Bond>>> getAll() throws URISyntaxException {
 	List<Resource<Bond>> bonds = bondRepository.findAll().stream().map(bondAssembler::toResource)
 		.collect(Collectors.toList());
-	return new Resources<Resource<Bond>>(bonds, linkTo(methodOn(BondController.class).getAll()).withSelfRel());
+	Resources<Resource<Bond>> resources = new Resources<Resource<Bond>>(bonds, linkTo(methodOn(BondController.class).getAll()).withSelfRel());
+	return ResponseEntity.created(new URI(resources.getId().expand().getHref())).body(resources);
     }
 
 //    curl -X POST localhost:8080/bonds -H 'Content-type:application/json' -d '{"bondName": "LVMH 19/23", "isin": "FR0013405347", "depth" : "560", "price" : "64.16"}' -u admin:pass
@@ -53,9 +54,10 @@ public class BondController {
 
 //    curl -v localhost:8080/bonds/1 -u jimmy:pass
     @GetMapping("/bonds/{id}")
-    public Resource<Bond> getBondById(@PathVariable Long id) {
-	return bondAssembler.toResource(
+    public ResponseEntity<Resource<Bond>> getBondById(@PathVariable Long id) throws URISyntaxException {
+	Resource<Bond> bond = bondAssembler.toResource(
 		bondRepository.findById(id).orElseThrow(() -> new BondException("ID = " + id + " not found.")));
+	return ResponseEntity.created(new URI(bond.getId().expand().getHref())).body(bond);
     }
 
 //    curl -X DELETE localhost:8080/bonds/4 -u admin:pass
@@ -67,7 +69,7 @@ public class BondController {
 
 //    CURL command similar to POST
     @PutMapping("/bonds/{id}")
-    public ResponseEntity<?> replaceEmployee(@RequestBody Bond newBond, @PathVariable Long id) throws URISyntaxException {
+    public ResponseEntity<?> replaceBond(@RequestBody Bond newBond, @PathVariable Long id) throws URISyntaxException {
 	Bond updatedBond = bondRepository.findById(id).map(bond -> {
 	    bond.setBondName(newBond.getBondName());
 	    bond.setIsin(newBond.getIsin());
