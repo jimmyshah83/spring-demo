@@ -32,7 +32,7 @@ You can also push the newly created docker image to docker hub as well.
 3. Install the required java version on the ec2 instance. 
 	I am using java 8 so I have done the below steps:
 	
-	`java -version`
+	`java -version` \n
 	`sudo apt update`
 	`sudo apt install default-jre`
 	`sudo apt install openjdk-8-jdk`
